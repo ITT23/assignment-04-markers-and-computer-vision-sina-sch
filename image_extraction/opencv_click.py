@@ -2,8 +2,14 @@ import cv2
 import numpy as np
 from arg_parser import get_parsed_arguments
 import sys
+from typing import List, Any
 
-def mouse_callback(event, x, y, flags, param):
+def mouse_callback(event, x, y, flags, param) -> None:
+    """
+    Four points in the image can be selected with a mouseclick.
+    To restart the selection, press esc.
+    The resulting rectangle is warped to a new image that can be saved by pressing 's'.
+    """
     global img, orig_img, points, output, result_width, result_height
 
     if event == cv2.EVENT_LBUTTONDOWN:
@@ -14,7 +20,6 @@ def mouse_callback(event, x, y, flags, param):
             pts = np.float32(pts)
             corners = np.float32(points[:4])
             M = cv2.getPerspectiveTransform(pts,corners)
-            # change height and width ??
             img = cv2.warpPerspective(img,M,(width - 1, height - 1))
             img = cv2.resize(img, (result_width, result_height), interpolation = cv2.INTER_AREA)
         cv2.imshow(WINDOW_NAME, img)
@@ -25,9 +30,12 @@ def mouse_callback(event, x, y, flags, param):
             img = orig_img.copy()
             cv2.imshow(WINDOW_NAME, img)
         elif key == ord('s'):
-            cv2.imwrite("new_sample_img.png", img)
+            cv2.imwrite(output, img)
 
-def bring_in_right_order(points):
+def bring_in_right_order(points:List[int]) -> List[int]:
+    """
+    sorts the input coordinates in same order as the corners
+    """
     pts = points[4:]
     corners = points[:4]
     vectors = []
@@ -43,13 +51,22 @@ def bring_in_right_order(points):
         
 
 # function from pyglet_click.py
-def measure_distance(x1, y1, x2, y2):
+def measure_distance(x1:int, y1:int, x2:int, y2:int) -> float:
+    """
+    measures the distance between the two input coordinates
+    """
     distance = np.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
     return distance
 
-def get_data_depending_on_input():
+def get_data_depending_on_input() -> List[Any]:
+    """
+    gets the input data that was specified via the cli, i.e.: 
+    - the path for the input image, 
+    - the path where the resulting image should be saved,
+    - the width of the resulting image and
+    - the height of the resulting image
+    """
     args = get_parsed_arguments()
-    print(args)
     if not args.input is None:
         input = args.input
     if not args.output is None:
@@ -62,7 +79,11 @@ def get_data_depending_on_input():
     try:
         return input, output, width, height
     except:
-        print("Specify all required arguments.")
+        print("Specify all required arguments: \n") 
+        print(" - the path for the input image (f.e. -input 'image.py'),")
+        print(" - the path where the resulting image should be saved (f.e. -output 'image.py'),")
+        print(" - the width of the resulting image (f.e. -width 700) and")
+        print(" - the height of the resulting image (f.e. -height 700).")
         sys.exit()
 
 
