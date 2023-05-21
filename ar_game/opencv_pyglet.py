@@ -5,12 +5,23 @@ from PIL import Image
 import sys
 import cv2.aruco as aruco
 from Bubbles import Bubbles
+from typing import List, Any
 
+video_id = 0
+if len(sys.argv) > 1:
+  video_id = int(sys.argv[1])
 
-WINDOW_WIDTH = 640
-WINDOW_HEIGHT = 360
+# Define the ArUco dictionary and parameters
+aruco_dict = aruco.getPredefinedDictionary(aruco.DICT_6X6_250)
+aruco_params = aruco.DetectorParameters()
 
+# Create a video capture object for the webcam
+cap = cv2.VideoCapture(video_id)
+resolution = cap.read()[1].shape
+WINDOW_HEIGHT = resolution[0]
+WINDOW_WIDTH = resolution[1]
 window = pyglet.window.Window(WINDOW_WIDTH, WINDOW_HEIGHT)
+
 
 # converts OpenCV image to PIL image and then to pyglet texture
 # https://gist.github.com/nkymut/1cb40ea6ae4de0cf9ded7332f1ca0d55
@@ -33,7 +44,8 @@ def cv2glet(img,fmt):
                                    pitch=top_to_bottom_flag*bytes_per_row)
     return pyimg
 
-def detect_markers(frame):
+def detect_markers(frame:List[Any]) -> List[Any]:
+    """detect the four markers"""
     # Convert the frame to grayscale
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
@@ -45,7 +57,8 @@ def detect_markers(frame):
         aruco.drawDetectedMarkers(frame, corners)
     return frame, corners
 
-def warp_image(frame, markers):
+def warp_image(frame:List[Any], markers:List[Any]) -> List[Any]:
+    """warp image -> the four markers are the new corners"""
     height, width, _ = frame.shape
     corners = np.float32([[0,0],[width - 1,0],[0,height - 1],[width - 1,height - 1]])
     corner_markers = []
@@ -57,10 +70,10 @@ def warp_image(frame, markers):
     corner_markers = np.float32(corner_markers)
     M = cv2.getPerspectiveTransform(corner_markers,corners)
     frame = cv2.warpPerspective(frame,M,(width - 1, height - 1))
-    #img = cv2.resize(img, (result_width, result_height), interpolation = cv2.INTER_AREA)
     return frame
 
-def detect_finger(frame):
+def detect_finger(frame:List[Any]) -> List[Any]:
+    """detect a finger or other object in the frame with edge detection"""
     img_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     ret, thresh = cv2.threshold(img_gray, 128, 255, cv2.THRESH_BINARY)
     contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -85,19 +98,4 @@ def on_draw():
     Bubbles.draw_bubbles()
     Bubbles.update_bubbles()
 
-
-
-if __name__ == "__main__":
-  video_id = 0
-  if len(sys.argv) > 1:
-    video_id = int(sys.argv[1])
-
-  # Define the ArUco dictionary and parameters
-  aruco_dict = aruco.getPredefinedDictionary(aruco.DICT_6X6_250)
-  aruco_params = aruco.DetectorParameters()
-
-  # Create a video capture object for the webcam
-  cap = cv2.VideoCapture(video_id)
-  bubbles = Bubbles.create_bubbles()
-
-  pyglet.app.run()
+pyglet.app.run()
