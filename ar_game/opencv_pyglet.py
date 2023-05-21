@@ -8,6 +8,7 @@ from Bubbles import Bubbles
 from Game import BubbleGame
 import config as c
 from typing import List, Any
+from imutils import perspective
 
 video_id = 0
 if len(sys.argv) > 1:
@@ -60,16 +61,33 @@ def detect_markers(frame:List[Any]) -> List[Any]:
         aruco.drawDetectedMarkers(frame, corners)
     return frame, corners
 
+# order_points_new from https://gist.github.com/flashlib/e8261539915426866ae910d55a3f9959
+def order_points_new(pts):
+    """ordering coordinates clockwise"""
+    # sort the points based on their x-coordinates
+    xSorted = pts[np.argsort(pts[:, 0]), :]
+
+    leftMost = xSorted[:2, :]
+    rightMost = xSorted[2:, :]
+
+    leftMost = leftMost[np.argsort(leftMost[:, 1]), :]
+    (tl, bl) = leftMost
+
+    rightMost = rightMost[np.argsort(rightMost[:, 1]), :]
+    (tr, br) = rightMost
+
+    return np.array([tl, tr, br, bl], dtype="float32")
+
 def warp_image(frame:List[Any], markers:List[Any]) -> List[Any]:
     """warp image -> the four markers are the new corners"""
     height, width, _ = frame.shape
     corners = np.float32([[0,0],[width - 1,0],[0,height - 1],[width - 1,height - 1]])
     corner_markers = []
-    i = [2, 1, 0, 3]
     idx = 0
     for marker in markers:
-       corner_markers.append(marker[0][i[idx]])
-       idx += 1
+      marker[0] = order_points_new(marker[0])
+      corner_markers.append(marker[0][idx])
+      idx += 1
     corner_markers = np.float32(corner_markers)
     M = cv2.getPerspectiveTransform(corner_markers,corners)
     frame = cv2.warpPerspective(frame,M,(width - 1, height - 1))
