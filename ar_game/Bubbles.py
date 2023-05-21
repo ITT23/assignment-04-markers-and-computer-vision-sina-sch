@@ -25,7 +25,7 @@ class Bubbles:
     def create_bubbles() -> None:
         """create random bubbles and save in a list"""
         for i in range(c.Bubble.NUM):
-            Bubbles.bubbles.append(Bubbles(x = random.randint(c.Bubble.WIDTH, c.Window.WIDTH - c.Bubble.WIDTH), y = c.Window.HEIGHT + i * 70))
+            Bubbles.bubbles.append(Bubbles(x = random.randint(c.Bubble.WIDTH, c.Window.WIDTH - c.Bubble.WIDTH), y = c.Window.HEIGHT + i * 50))
 
     def draw_bubbles() -> None:
         """draw all bubbles"""
@@ -46,6 +46,7 @@ class Bubbles:
         for bubble in Bubbles.bubbles:
             if bubble.bubble_spr.y == 0:
                  score -= 5
+                 bubble.display = False
         return score
     
     def collides_with(self, x:int, y:int) -> bool:
@@ -62,7 +63,7 @@ class Bubbles:
                 y = contour[0][0][1]
                 # make sure bubbles don't disappear because of detection of the border
                 if not x < 20 and not y < 20 and not x > c.Window.WIDTH - 20 and not y > c.Window.HEIGHT - 20:
-                    if bubble.collides_with(x, y):
+                    if bubble.collides_with(x, y) and bubble.display:
                         bubble.display = False
                         score += 10
         return score

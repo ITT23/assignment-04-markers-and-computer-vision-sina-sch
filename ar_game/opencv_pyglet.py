@@ -8,7 +8,6 @@ from Bubbles import Bubbles
 from Game import BubbleGame
 import config as c
 from typing import List, Any
-from imutils import perspective
 
 video_id = 0
 if len(sys.argv) > 1:
@@ -113,11 +112,21 @@ def on_draw():
       frame = warp_image(frame, markers)
       frame, contours = detect_finger(frame)
       game.score = Bubbles.handle_collision_with(contours, game.score)
+      game.update_game()
       
     img = cv2glet(frame, 'BGR')
     img.blit(0, 0, 0)
     game.draw_game()
-    game.update_game()
+
+
+@window.event
+def on_key_press(symbol, modifiers):
+    # to restart the game, press 'r'
+    if symbol == pyglet.window.key.R:
+        game.restart()
+    # quit with q
+    elif symbol == pyglet.window.key.Q:
+        sys.exit(0)
 
 
 pyglet.app.run()
