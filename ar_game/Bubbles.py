@@ -25,7 +25,7 @@ class Bubbles:
     def create_bubbles() -> None:
         """create random bubbles and save in a list"""
         for i in range(c.Bubble.NUM):
-            Bubbles.bubbles.append(Bubbles(x = random.randint(0, c.Window.WIDTH - 1), y = c.Window.HEIGHT + i * 70))
+            Bubbles.bubbles.append(Bubbles(x = random.randint(c.Bubble.WIDTH, c.Window.WIDTH - c.Bubble.WIDTH), y = c.Window.HEIGHT + i * 70))
 
     def draw_bubbles() -> None:
         """draw all bubbles"""
@@ -42,15 +42,20 @@ class Bubbles:
         """update the position of one bubble"""
         self.bubble_spr.y -= 1
     
+    def check_border(score:int) -> int:
+        for bubble in Bubbles.bubbles:
+            if bubble.bubble_spr.y == 0:
+                 score -= 5
+        return score
+    
     def collides_with(self, x:int, y:int) -> bool:
         """determine if a bubble collides with a finger/other object"""
         collision_distance = self.bubble_spr.width/2
         actual_distance = measure_distance(self.bubble_spr.x, self.bubble_spr.y, x, y)
         return (actual_distance <= collision_distance) and (self.bubble_spr.y >= y)
 
-    def handle_collision_with(contours:List[Any]) -> None:
+    def handle_collision_with(contours:List[Any], score:int) -> int:
         """if a bubble collides with another object it disappears"""
-        global score
         for bubble in Bubbles.bubbles:
             for contour in contours:
                 x = contour[0][0][0]
@@ -59,3 +64,5 @@ class Bubbles:
                 if not x < 20 and not y < 20 and not x > c.Window.WIDTH - 20 and not y > c.Window.HEIGHT - 20:
                     if bubble.collides_with(x, y):
                         bubble.display = False
+                        score += 10
+        return score

@@ -5,6 +5,7 @@ from PIL import Image
 import sys
 import cv2.aruco as aruco
 from Bubbles import Bubbles
+from Game import BubbleGame
 import config as c
 from typing import List, Any
 
@@ -23,8 +24,7 @@ c.Window.HEIGHT = resolution[0]
 c.Window.WIDTH = resolution[1]
 window = pyglet.window.Window(c.Window.WIDTH, c.Window.HEIGHT)
 
-bubbles = Bubbles.create_bubbles()
-
+game = BubbleGame()
 
 # converts OpenCV image to PIL image and then to pyglet texture
 # https://gist.github.com/nkymut/1cb40ea6ae4de0cf9ded7332f1ca0d55
@@ -94,11 +94,12 @@ def on_draw():
     if len(markers) == 4:
       frame = warp_image(frame, markers)
       frame, contours = detect_finger(frame)
-      Bubbles.handle_collision_with(contours)
+      game.score = Bubbles.handle_collision_with(contours, game.score)
       
     img = cv2glet(frame, 'BGR')
     img.blit(0, 0, 0)
-    Bubbles.draw_bubbles()
-    Bubbles.update_bubbles()
+    game.draw_game()
+    game.update_game()
+
 
 pyglet.app.run()
