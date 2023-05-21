@@ -5,6 +5,7 @@ from PIL import Image
 import sys
 import cv2.aruco as aruco
 from Bubbles import Bubbles
+import config as c
 from typing import List, Any
 
 video_id = 0
@@ -18,9 +19,11 @@ aruco_params = aruco.DetectorParameters()
 # Create a video capture object for the webcam
 cap = cv2.VideoCapture(video_id)
 resolution = cap.read()[1].shape
-WINDOW_HEIGHT = resolution[0]
-WINDOW_WIDTH = resolution[1]
-window = pyglet.window.Window(WINDOW_WIDTH, WINDOW_HEIGHT)
+c.Window.HEIGHT = resolution[0]
+c.Window.WIDTH = resolution[1]
+window = pyglet.window.Window(c.Window.WIDTH, c.Window.HEIGHT)
+
+bubbles = Bubbles.create_bubbles()
 
 
 # converts OpenCV image to PIL image and then to pyglet texture

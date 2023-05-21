@@ -1,12 +1,9 @@
 import pyglet
 import numpy as np
+import random
+import config as c
 from typing import List, Any
 
-WINDOW_WIDTH = 640
-WINDOW_HEIGHT = 480
-
-
-xs = [200, 300, 220, 110, 50, 170, 280, 330, 400, 470]
 
 def measure_distance(x1:int, y1:int, x2:int, y2:int) -> float:
     """measures the distance between two coordinates"""
@@ -15,20 +12,20 @@ def measure_distance(x1:int, y1:int, x2:int, y2:int) -> float:
 
 class Bubbles:
     bubbles = []
-    def __init__(self, x = 200, y = WINDOW_HEIGHT):
+    def __init__(self, x = 200, y = c.Window.HEIGHT):
         self.x = x
         self.y = y
         # image source: https://de.cleanpng.com/png-rjxjvc/
         self.img = pyglet.resource.image("bubble.png")
-        self.img.width = 50
-        self.img.height = 50
+        self.img.width = c.Bubble.WIDTH
+        self.img.height = c.Bubble.HEIGHT
         self.bubble_spr = pyglet.sprite.Sprite(self.img, x=x, y=y)
         self.display = True
         
     def create_bubbles() -> None:
         """create random bubbles and save in a list"""
-        for i in range(10):
-            Bubbles.bubbles.append(Bubbles(x = xs[i], y = WINDOW_HEIGHT + i * 70))
+        for i in range(c.Bubble.NUM):
+            Bubbles.bubbles.append(Bubbles(x = random.randint(0, c.Window.WIDTH - 1), y = c.Window.HEIGHT + i * 70))
 
     def draw_bubbles() -> None:
         """draw all bubbles"""
@@ -58,6 +55,7 @@ class Bubbles:
             for contour in contours:
                 x = contour[0][0][0]
                 y = contour[0][0][1]
-                if not x < 20 and not y < 20 and not x > 620 and not y > 340:
+                # make sure bubbles don't disappear because of detection of the border
+                if not x < 20 and not y < 20 and not x > c.Window.WIDTH - 20 and not y > c.Window.HEIGHT - 20:
                     if bubble.collides_with(x, y):
                         bubble.display = False
