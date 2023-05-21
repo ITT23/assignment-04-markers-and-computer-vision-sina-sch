@@ -23,7 +23,7 @@ while True:
 
     # Detect ArUco markers in the frame
     corners, ids, rejectedImgPoints = aruco.detectMarkers(gray, aruco_dict, parameters=aruco_params)
-
+    print(ids, corners)
     # Check if marker is detected
     if ids is not None:
         # Draw lines along the sides of the marker
